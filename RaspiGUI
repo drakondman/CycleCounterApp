@@ -63,14 +63,14 @@ class Interact(GridLayout):
         
         self.part1.add_widget(self.part2)
 
-    def Apply_Button(self, dt):
+    def Apply_Button(self, i):
 
         Preset = self.part1.Preset.text#grabbing data from the fields to save
         CycleTime = self.part1.CycleTime.text
 
         print("Hit")
-        cycles = '0'
-        cycleCap = int(self.part1.Preset.text)
+        self.part1.cycles = 0
+        self.part1.cycleCap = int(self.part1.Preset.text)
 
         self.part1.PresetL.text = ("Preset: " + Preset)
 
@@ -84,8 +84,8 @@ class Interact(GridLayout):
 
     def cycle_updater(self, dt):
         self.part1.Ct.text = "Current Cycles: " + str(self.cycles)
-        self.cycles += 1
-        if(cycles == cycleCap):
+        self.part1.cycles += 1
+        if(self.part1.cycles == self.part1.cycleCap):
             self.cycle_count.cancel()
 
 class GUI(App):
