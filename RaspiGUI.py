@@ -11,17 +11,18 @@ from kivy.graphics import Color, Rectangle
 from kivy.uix.image import AsyncImage
 from kivy.lang import Builder
 from kivy.uix.image import Image
-
 class Interact(GridLayout):
+    cycle_count = None
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
         self.cols = 1
         self.part1 = GridLayout()
         self.part1.cols = 2
-
         self.part2 = GridLayout(cols=4, row_force_default=True, row_default_height=100,rows = 0)
     
+
         if os.path.isfile("prev_details.txt"):#Saves previous input to a txt file and redisplays it on launch
            with open("prev_details.txt", "r") as f:
             d = f.read().split(",")
@@ -31,6 +32,7 @@ class Interact(GridLayout):
         else:
             prev_preset = ""
             prev_time = ""
+
         
         self.cols = 1
 
@@ -46,7 +48,7 @@ class Interact(GridLayout):
         
         self.part1.CycleTimeL = Label(text=("CycleTime Seconds: " + prev_time ),font_size = 18)
         self.part1.add_widget(self.part1.CycleTimeL)
-        self.part1.CycleTime = TextInput(text=(prev_preset), multiline=False)
+        self.part1.CycleTime = TextInput(text=(prev_time), multiline=False)
         self.part1.add_widget(self.part1.CycleTime)
 
         self.part1.Ct = Label(text=("Current Cycles: \n"),font_size = 18)
@@ -57,45 +59,67 @@ class Interact(GridLayout):
         self.part1.add_widget(self.Apply)
         
         self.add_widget(self.part1)
-######################################################################################
+
         self.Pause = Button(text=("Pause"),font_size = 40,size_hint_x=100, width=100)
         self.part2.add_widget(self.Pause)
+        self.Pause.bind(on_press = self.Pause_Button)
 
         self.Reset = Button(text=("Reset"),font_size = 40,size_hint_x=100, width=100)
         self.part2.add_widget(self.Reset)
-        
+        self.Reset.bind(on_press = self.Reset_Button)
+
         self.part1.add_widget(self.part2)
 
     def Apply_Button(self, instance):
 
-        Preset = self.part1.Preset.text#grabbing data from the fields to save
-        CycleTime = self.part1.CycleTime.text
-
-        print("Hit")
+        self.part1.PresetG = self.part1.Preset.text#grabbing data from the fields to save
+        self.part1.CycleTimeG = self.part1.CycleTime.text
         self.part1.cycles = 0
-        self.part1.cycleCap = int(self.part1.Preset.text)
+        self.part1.cycleCap = int(self.part1.PresetG)
 
-        self.part1.PresetL.text = ("Preset: " + Preset)
+        self.part1.PresetL.text = ("Preset: " + self.part1.PresetG)
 
-        self.part1.CycleTimeL.text = ("CycleTime Seconds: " + CycleTime)
-        user_input_time = int(self.part1.CycleTime.text)
-
-        self.cycle_count = Clock.schedule_interval(self.cycle_updater, user_input_time)
+        self.part1.CycleTimeL.text = ("CycleTime Seconds: " + self.part1.CycleTimeG)
+        self.user_input_time = int(self.part1.CycleTimeG)
+        if self.cycle_count:
+            self.cycle_count.cancel()
+            self.cycle_count = None
+        
+        self.cycle_count = Clock.schedule_interval(self.cycle_updater, self.user_input_time)
 
         with open("prev_details.txt", "w") as f:#Writing previous input to local txt file
-            f.write(f"{Preset},{CycleTime}")
+            f.write(f"{self.part1.PresetG},{self.part1.CycleTimeG}")
 
     def cycle_updater(self, dt):
         print('hit clock')
 
-        self.part1.Ct.text = "Current Cycles: " + str(self.cycles)
+        self.part1.Ct.text = "Current Cycles: " + str(self.part1.cycles) + "\nPreset: " + str(self.part1.cycleCap)
         self.part1.cycles += 1
-        print('hit clock')
-        if(self.part1.cycles == self.part1.cycleCap):
+        if(int(self.part1.cycles) == int(self.part1.cycleCap)):
             self.cycle_count.cancel()
+
+    def Pause_Button(self,instance):
+        if self.cycle_count:
+            self.cycle_count.cancel()
+            self.cycle_count = None
+
+            self.part1.Ct.text = "Current Cycles: " + str(self.part1.cycles) + "\nPreset: " + str(self.part1.cycleCap) + "\nPaused"
+            self.Pause.text = "Resume"            
+        else:
+            self.cycle_count = Clock.schedule_interval(self.cycle_updater, self.user_input_time)
+            self.Pause.text = "Pause"
+   
+    def Reset_Button(self,instance):
+        self.part1.cycles = 0
+        if self.cycle_count: 
+            self.part1.Ct.text = "Current Cycles: " + str(self.part1.cycles) + "\nPreset: " + str(self.part1.cycleCap)
+        else:
+            self.part1.Ct.text = "Current Cycles: " + str(self.part1.cycles) + "\nPreset: " + str(self.part1.cycleCap) + "\nPaused"
+            
 
 class GUI(App):
     def build(self):
         return Interact()
 if __name__ =="__main__":
     GUI().run() 
+
