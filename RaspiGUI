@@ -11,6 +11,7 @@ from kivy.graphics import Color, Rectangle
 from kivy.uix.image import AsyncImage
 from kivy.lang import Builder
 from kivy.uix.image import Image
+
 class Interact(GridLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -18,6 +19,7 @@ class Interact(GridLayout):
         self.cols = 1
         self.part1 = GridLayout()
         self.part1.cols = 2
+
         self.part2 = GridLayout(cols=4, row_force_default=True, row_default_height=100,rows = 0)
     
         if os.path.isfile("prev_details.txt"):#Saves previous input to a txt file and redisplays it on launch
@@ -29,12 +31,13 @@ class Interact(GridLayout):
         else:
             prev_preset = ""
             prev_time = ""
-
         
         self.cols = 1
 
-        #self.part1.add_widget(self.logo)
-        #self.part1.add_widget(Label(text=('')))
+        self.logo = Image(source=('logo.png'))
+        self.part1.add_widget(self.logo)
+
+        self.part1.add_widget(Label(text=('')))
 
         self.part1.PresetL =Label(text=("Preset: " + prev_preset),font_size = 18)
         self.part1.add_widget(self.part1.PresetL)
@@ -54,7 +57,7 @@ class Interact(GridLayout):
         self.part1.add_widget(self.Apply)
         
         self.add_widget(self.part1)
-
+######################################################################################
         self.Pause = Button(text=("Pause"),font_size = 40,size_hint_x=100, width=100)
         self.part2.add_widget(self.Pause)
 
@@ -63,7 +66,7 @@ class Interact(GridLayout):
         
         self.part1.add_widget(self.part2)
 
-    def Apply_Button(self, i):
+    def Apply_Button(self, instance):
 
         Preset = self.part1.Preset.text#grabbing data from the fields to save
         CycleTime = self.part1.CycleTime.text
@@ -83,8 +86,11 @@ class Interact(GridLayout):
             f.write(f"{Preset},{CycleTime}")
 
     def cycle_updater(self, dt):
+        print('hit clock')
+
         self.part1.Ct.text = "Current Cycles: " + str(self.cycles)
         self.part1.cycles += 1
+        print('hit clock')
         if(self.part1.cycles == self.part1.cycleCap):
             self.cycle_count.cancel()
 
