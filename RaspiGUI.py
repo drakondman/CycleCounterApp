@@ -11,6 +11,7 @@ from kivy.graphics import Color, Rectangle
 from kivy.uix.image import AsyncImage
 from kivy.lang import Builder
 from kivy.uix.image import Image
+from kivy.uix.popup import Popup
 class Interact(GridLayout):
     cycle_count = None
 
@@ -59,6 +60,7 @@ class Interact(GridLayout):
         self.part1.add_widget(self.Apply)
         
         self.add_widget(self.part1)
+######################################################################################
 
         self.Pause = Button(text=("Pause"),font_size = 40,size_hint_x=100, width=100)
         self.part2.add_widget(self.Pause)
@@ -67,6 +69,7 @@ class Interact(GridLayout):
         self.Reset = Button(text=("Reset"),font_size = 40,size_hint_x=100, width=100)
         self.part2.add_widget(self.Reset)
         self.Reset.bind(on_press = self.Reset_Button)
+
 
         self.part1.add_widget(self.part2)
 
@@ -115,7 +118,8 @@ class Interact(GridLayout):
             self.part1.Ct.text = "Current Cycles: " + str(self.part1.cycles) + "\nPreset: " + str(self.part1.cycleCap)
         else:
             self.part1.Ct.text = "Current Cycles: " + str(self.part1.cycles) + "\nPreset: " + str(self.part1.cycleCap) + "\nPaused"
-            
+class Poppy(GridLayout):
+    pass
 
 class GUI(App):
     def build(self):
