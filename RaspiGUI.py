@@ -12,6 +12,7 @@ from kivy.uix.image import AsyncImage
 from kivy.lang import Builder
 from kivy.uix.image import Image
 from kivy.uix.popup import Popup
+from kivy.uix.vkeyboard import VKeyboard
 class Interact(GridLayout):
     cycle_count = None
 
@@ -118,12 +119,48 @@ class Interact(GridLayout):
             self.part1.Ct.text = "Current Cycles: " + str(self.part1.cycles) + "\nPreset: " + str(self.part1.cycleCap)
         else:
             self.part1.Ct.text = "Current Cycles: " + str(self.part1.cycles) + "\nPreset: " + str(self.part1.cycleCap) + "\nPaused"
-class Poppy(GridLayout):
-    pass
+"""class Keypad(GridLayout):
+    def __init__(self, *args, **kwargs)
+        self.cols = 3
+        self.spacing = 10 
+        self.createNums()
+    def createNums(self):
+        nums = [1,2,3,4,5,6,7,8,9,'<--','Enter']
+        for i in nums"""
+class MyKeyboardListener(Widget):
+
+    def __init__(self, **kwargs):
+        super(MyKeyboardListener, self).__init__(**kwargs)
+        self._keyboard = Window.request_keyboard(
+            self._keyboard_closed, self, 'text')
+        if self._keyboard.widget:
+            # If it exists, this widget is a VKeyboard object which you can use
+            # to change the keyboard layout.
+            pass
+        self._keyboard.bind(on_key_down=self._on_keyboard_down)
+
+    def _keyboard_closed(self):
+        print('My keyboard have been closed!')
+        self._keyboard.unbind(on_key_down=self._on_keyboard_down)
+        self._keyboard = None
+
+    def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
+        print('The key', keycode, 'have been pressed')
+        print(' - text is %r' % text)
+        print(' - modifiers are %r' % modifiers)
+
+        # Keycode is composed of an integer + a string
+        # If we hit escape, release the keyboard
+        if keycode[1] == 'escape':
+            keyboard.release()
+
+        # Return True to accept the key. Otherwise, it will be used by
+        # the system.
+        return True
 
 class GUI(App):
     def build(self):
         return Interact()
 if __name__ =="__main__":
     GUI().run() 
-
+    GUI(MyKeyboardListener())
