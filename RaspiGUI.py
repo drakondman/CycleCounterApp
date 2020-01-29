@@ -1,6 +1,7 @@
 import os
 import time
 import kivy
+import Rpi.GPIO as GPIO
 from kivy.config import Config
 Config.set('kivy', 'keyboard_mode', 'systemandmulti')
 from kivy.app import App   
@@ -17,6 +18,24 @@ from kivy.uix.popup import Popup
 from kivy.uix.vkeyboard import VKeyboard
 from kivy.core.window import Window
 from kivy.uix.widget import Widget 
+
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BOARD)
+
+Relay1 = 37
+Relay2 = 33
+Relay3 = 36
+Relay4 = 18
+
+GPIO.setup(Relay1, GPIO.OUT)
+GPIO.setup(Relay2, GPIO.OUT)
+GPIO.setup(Relay3, GPIO.OUT)
+GPIO.setup(Relay4, GPIO.OUT)
+
+GPIO.output(Relay1, GPIO.LOW)
+GPIO.output(Relay2, GPIO.LOW)
+GPIO.output(Relay3, GPIO.LOW)
+GPIO.output(Relay4, GPIO.LOW)
 
 class Interact(GridLayout):
     cycle_count = None
@@ -50,12 +69,12 @@ class Interact(GridLayout):
 
         self.part1.PresetL =Label(text=("Preset: " + prev_preset),font_size = 18)
         self.part1.add_widget(self.part1.PresetL)
-        self.part1.Preset = TextInput(text= (prev_preset),multiline=False)
+        self.part1.Preset = CustomTextInput(text= (prev_preset),multiline=False)
         self.part1.add_widget(self.part1.Preset)
         
         self.part1.CycleTimeL = Label(text=("CycleTime Seconds: " + prev_time ),font_size = 18)
         self.part1.add_widget(self.part1.CycleTimeL)
-        self.part1.CycleTime = TextInput(text=(prev_time), multiline=False)
+        self.part1.CycleTime = CustomTextInput(text=(prev_time), multiline=False)
         self.part1.add_widget(self.part1.CycleTime)
 
         self.part1.Ct = Label(text=("Current Cycles: \n"),font_size = 18)
@@ -80,6 +99,10 @@ class Interact(GridLayout):
         self.part1.add_widget(self.part2)
 
     def Apply_Button(self, instance):
+        GPIO.output(Relay1, GPIO.LOW)
+        GPIO.output(Relay2, GPIO.LOW)
+        GPIO.output(Relay3, GPIO.LOW)
+        GPIO.output(Relay4, GPIO.LOW)
 
         self.part1.PresetG = self.part1.Preset.text#grabbing data from the fields to save
         self.part1.CycleTimeG = self.part1.CycleTime.text
@@ -88,8 +111,8 @@ class Interact(GridLayout):
 
         self.part1.PresetL.text = ("Preset: " + self.part1.PresetG)
 
-        self.part1.CycleTimeL.text = ("CycleTime Seconds: " + self.part1.CycleTimeG)
-        self.user_input_time = int(self.part1.CycleTimeG)
+        self.part1.CycleTimeL.text = ("CycleTime MiliSeconds: " + self.part1.CycleTimeG)
+        self.user_input_time = float(self.part1.CycleTimeG/10)
         if self.cycle_count:
             self.cycle_count.cancel()
             self.cycle_count = None
@@ -101,13 +124,21 @@ class Interact(GridLayout):
 
     def cycle_updater(self, dt):
         print('hit clock')
-
+        GPIO.output(Relay1, GPIO.HIGH)
+        GPIO.output(Relay2, GPIO.HIGH)
+        GPIO.output(Relay3, GPIO.HIGH)
+        GPIO.output(Relay4, GPIO.HIGH)
         self.part1.Ct.text = "Current Cycles: " + str(self.part1.cycles) + "\nPreset: " + str(self.part1.cycleCap)
         self.part1.cycles += 1
         if(int(self.part1.cycles) == int(self.part1.cycleCap)):
             self.cycle_count.cancel()
 
     def Pause_Button(self,instance):
+        GPIO.output(Relay1, GPIO.LOW)
+        GPIO.output(Relay2, GPIO.LOW)
+        GPIO.output(Relay3, GPIO.LOW)
+        GPIO.output(Relay4, GPIO.LOW)
+
         if self.cycle_count:
             self.cycle_count.cancel()
             self.cycle_count = None
@@ -119,6 +150,11 @@ class Interact(GridLayout):
             self.Pause.text = "Pause"
    
     def Reset_Button(self,instance):
+        GPIO.output(Relay1, GPIO.LOW)
+        GPIO.output(Relay2, GPIO.LOW)
+        GPIO.output(Relay3, GPIO.LOW)
+        GPIO.output(Relay4, GPIO.LOW)
+
         self.part1.cycles = 0
         if self.cycle_count: 
             self.part1.Ct.text = "Current Cycles: " + str(self.part1.cycles) + "\nPreset: " + str(self.part1.cycleCap)
@@ -132,42 +168,16 @@ class Interact(GridLayout):
     def createNums(self):
         nums = [1,2,3,4,5,6,7,8,9,'<--','Enter']
         for i in nums"""
-class MyKeyboardListener(Widget):
-
-    def __init__(self, **kwargs):
-        super(MyKeyboardListener, self).__init__(**kwargs)
-        self._keyboard = Window.request_keyboard(
-            self._keyboard_closed, self,'text')
-        if self._keyboard.widget:
-            vkeyboard = self._keyboard.widget
+class CustomTextInput(TextInput):
+    def on_keyboard(self, instance, value):
+        if self.keyboard.widget:
+            vkeyboard = self.keyboard.widget
             vkeyboard.layout = 'keynums.json'
-            pass
-        self._keyboard.bind(on_key_down=self._on_keyboard_down)
-
-    def _keyboard_closed(self):
-        print('My keyboard have been closed!')
-        self._keyboard.unbind(on_key_down=self._on_keyboard_down)
-        self._keyboard = None
-
-    def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
-        print('The key', keycode, 'have been pressed')
-        print(' - text is %r' % text)
-        print(' - modifiers are %r' % modifiers)
-
-        # Keycode is composed of an integer + a string
-        # If we hit escape, release the keyboard
-        if keycode[1] == 'escape':
-            keyboard.release()
-
-        # Return True to accept the key. Otherwise, it will be used by
-        # the system.
-        return True
-
+        
 class GUI(App):
     def build(self):
 
         return Interact()
-        return MyKeyboardListener()
 
 if __name__ =="__main__":
     GUI().run() 
