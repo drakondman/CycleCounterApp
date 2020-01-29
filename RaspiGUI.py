@@ -15,6 +15,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.vkeyboard import VKeyboard
 from kivy.core.window import Window
 from kivy.uix.widget import Widget 
+from kivy.config import Config
 
 class Interact(GridLayout):
     cycle_count = None
@@ -135,8 +136,11 @@ class MyKeyboardListener(Widget):
     def __init__(self, **kwargs):
         super(MyKeyboardListener, self).__init__(**kwargs)
         self._keyboard = Window.request_keyboard(
-            self._keyboard_closed, self, 'text')
+            self._keyboard_closed, self, 'text',)
         if self._keyboard.widget:
+            self.VKeyboard.setup_mode(docked = True)
+            vkeyboard = self._keyboard.widget
+            vkeyboard.layout = 'keynums.json'
             # If it exists, this widget is a VKeyboard object which you can use
             # to change the keyboard layout.
             pass
@@ -163,9 +167,10 @@ class MyKeyboardListener(Widget):
 
 class GUI(App):
     def build(self):
+        Config.set('kivy', 'keyboard_mode', 'systemandmulti')
+
         return Interact()
+        return MyKeyboardListener()
+
 if __name__ =="__main__":
     GUI().run() 
-    GUI(MyKeyboardListener())
-
-
