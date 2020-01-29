@@ -13,6 +13,9 @@ from kivy.lang import Builder
 from kivy.uix.image import Image
 from kivy.uix.popup import Popup
 from kivy.uix.vkeyboard import VKeyboard
+from kivy.core.window import Window
+from kivy.uix.widget import Widget 
+
 class Interact(GridLayout):
     cycle_count = None
 
@@ -164,3 +167,5 @@ class GUI(App):
 if __name__ =="__main__":
     GUI().run() 
     GUI(MyKeyboardListener())
+
+
