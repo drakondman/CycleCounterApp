@@ -18,6 +18,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.vkeyboard import VKeyboard
 from kivy.core.window import Window
 from kivy.uix.widget import Widget 
+Window.fullscreen = True
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)
