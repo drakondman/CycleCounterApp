@@ -1,7 +1,7 @@
 import os
 import time
 import kivy
-import Rpi.GPIO as GPIO
+import RPi.GPIO as GPIO
 from kivy.config import Config
 Config.set('kivy', 'keyboard_mode', 'systemandmulti')
 from kivy.app import App   
