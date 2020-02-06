@@ -3,7 +3,7 @@ import time
 import kivy
 import RPi.GPIO as GPIO
 from kivy.config import Config
-Config.set('kivy', 'keyboard_mode', 'systemandmulti')
+Config.set('kivy', 'keyboard_mode', 'systemanddock')
 from kivy.app import App   
 from kivy.uix.label import Label
 from kivy.uix.gridlayout import GridLayout
