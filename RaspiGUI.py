@@ -203,8 +203,7 @@ class Interact(GridLayout):
         self.createNums()
     def createNums(self):
         nums = [1,2,3,4,5,6,7,8,9,'<--','Enter']
-        for i in nums""
-        "
+        for i in nums"""
 class CustomTextInput(TextInput):
     def on_keyboard(self, instance, value):
         if self.keyboard.widget:
