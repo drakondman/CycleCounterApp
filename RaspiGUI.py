@@ -113,43 +113,77 @@ class Interact(GridLayout):
         self.part1.PresetL.text = ("Preset: " + self.part1.PresetG)
 
         self.part1.CycleTimeL.text = ("CycleTime MiliSeconds: " + self.part1.CycleTimeG)
-        self.user_input_time = float(self.part1.CycleTimeG/10)
+        self.user_input_timei = int(self.part1.CycleTimeG)
+        self.user_input_timef = float(self.user_input_timei/1000)
+
+        self.relay_wacker = float((self.user_input_timef/2)-.001)
+        self.relay_wacker2 = float((self.relay_wacker)+.001)
+
+        if self.cycle_count:
+            self.cycle_count.cancel()
+            self.cycle_count = None
+        if self.relay_low:
+            self.relay_low.cancel()
+        if self.relay_howl:
+            self.relay_howl.cancel()
         if self.cycle_count:
             self.cycle_count.cancel()
             self.cycle_count = None
         
         self.cycle_count = Clock.schedule_interval(self.cycle_updater, self.user_input_time)
-
+        self.relay_low = Clock.schedule_interval(self.relay_lowl, self.relay_wacker)
+        self.relay_howl = Clock.schedule_interval(self.relay_high, self.relay_wacker2)
+        
         with open("prev_details.txt", "w") as f:#Writing previous input to local txt file
             f.write(f"{self.part1.PresetG},{self.part1.CycleTimeG}")
 
     def cycle_updater(self, dt):
-        print('hit clock')
-        GPIO.output(Relay1, GPIO.HIGH)
-        GPIO.output(Relay2, GPIO.HIGH)
-        GPIO.output(Relay3, GPIO.HIGH)
-        GPIO.output(Relay4, GPIO.HIGH)
         self.part1.Ct.text = "Current Cycles: " + str(self.part1.cycles) + "\nPreset: " + str(self.part1.cycleCap)
         self.part1.cycles += 1
         if(int(self.part1.cycles) == int(self.part1.cycleCap)):
             self.cycle_count.cancel()
 
     def Pause_Button(self,instance):
-        GPIO.output(Relay1, GPIO.LOW)
-        GPIO.output(Relay2, GPIO.LOW)
-        GPIO.output(Relay3, GPIO.LOW)
-        GPIO.output(Relay4, GPIO.LOW)
-
         if self.cycle_count:
             self.cycle_count.cancel()
             self.cycle_count = None
 
             self.part1.Ct.text = "Current Cycles: " + str(self.part1.cycles) + "\nPreset: " + str(self.part1.cycleCap) + "\nPaused"
-            self.Pause.text = "Resume"            
+            self.Pause.text = "Resume"   
+            print("PAUSED")         
         else:
-            self.cycle_count = Clock.schedule_interval(self.cycle_updater, self.user_input_time)
+            self.cycle_count = Clock.schedule_interval(self.cycle_updater, self.user_input_timef)
             self.Pause.text = "Pause"
-   
+            print("RESUME")
+
+        if self.relay_low:
+            self.relay_low.cancel()
+
+        else:
+            self.relay_low = Clock.schedule_interval(self.relay_lowl, self.relay_wacker)
+        if self.relay_howl:
+            self.relay_howl.cancel()
+
+        else:
+            self.relay_howl = Clock.schedule_interval(self.relay_high, self.relay_wacker2)
+
+           
+    
+    def relay_lowl(self, dt):
+        print("Relay Low")
+        GPIO.output(Relay1, GPIO.LOW)
+        GPIO.output(Relay2, GPIO.LOW)
+        GPIO.output(Relay3, GPIO.LOW)
+        GPIO.output(Relay4, GPIO.LOW)
+ 
+    
+    def relay_high(self, dt):
+        print("Relay High")
+        GPIO.output(Relay1, GPIO.HIGH)
+        GPIO.output(Relay2, GPIO.HIGH)
+        GPIO.output(Relay3, GPIO.HIGH)
+        GPIO.output(Relay4, GPIO.HIGH)
+        
     def Reset_Button(self,instance):
         GPIO.output(Relay1, GPIO.LOW)
         GPIO.output(Relay2, GPIO.LOW)
@@ -161,6 +195,7 @@ class Interact(GridLayout):
             self.part1.Ct.text = "Current Cycles: " + str(self.part1.cycles) + "\nPreset: " + str(self.part1.cycleCap)
         else:
             self.part1.Ct.text = "Current Cycles: " + str(self.part1.cycles) + "\nPreset: " + str(self.part1.cycleCap) + "\nPaused"
+            
 """class Keypad(GridLayout):
     def __init__(self, *args, **kwargs)
         self.cols = 3
@@ -168,7 +203,8 @@ class Interact(GridLayout):
         self.createNums()
     def createNums(self):
         nums = [1,2,3,4,5,6,7,8,9,'<--','Enter']
-        for i in nums"""
+        for i in nums""
+        "
 class CustomTextInput(TextInput):
     def on_keyboard(self, instance, value):
         if self.keyboard.widget:
