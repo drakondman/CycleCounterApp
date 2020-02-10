@@ -23,7 +23,8 @@ Window.fullscreen = True
 
 class Interact(GridLayout):
     cycle_count = None
-
+    relay_low = None
+    relay_howl = None
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -84,32 +85,51 @@ class Interact(GridLayout):
 
     def Apply_Button(self, instance):
 
-
         self.part1.PresetG = self.part1.Preset.text#grabbing data from the fields to save
         self.part1.CycleTimeG = self.part1.CycleTime.text
         self.part1.cycles = 0
         self.part1.cycleCap = int(self.part1.PresetG)
 
-        self.part1.PresetL.text = ("Preset: " + self.part1.PresetG)
+        self.part1.PresetL.text = ("Preset:\n " + self.part1.PresetG)
 
-        self.part1.CycleTimeL.text = ("CycleTime MiliSeconds: " + self.part1.CycleTimeG)
-        self.user_input_time = int(self.part1.CycleTimeG)
+        self.part1.CycleTimeL.text = ("CycleTime MiliSeconds:\n " + self.part1.CycleTimeG)
+        self.user_input_timei = int(self.part1.CycleTimeG)
+        self.user_input_timef = float(self.user_input_timei/1000)
+
+        self.relay_wacker = float((self.user_input_timef/2)-.001)
+        self.relay_wacker2 = float((self.relay_wacker)+.001)
+
         if self.cycle_count:
             self.cycle_count.cancel()
             self.cycle_count = None
-        
-        self.cycle_count = Clock.schedule_interval(self.cycle_updater, self.user_input_time)
+        if self.relay_low:
+            self.relay_low.cancel()
+           
+       
+        self.cycle_count = Clock.schedule_interval(self.cycle_updater, self.user_input_timef)
+        self.relay_low = Clock.schedule_interval(self.relay_lowl, self.relay_wacker)
+        self.relay_howl = Clock.schedule_interval(self.relay_high, self.relay_wacker2)
+     
 
         with open("prev_details.txt", "w") as f:#Writing previous input to local txt file
             f.write(f"{self.part1.PresetG},{self.part1.CycleTimeG}")
 
     def cycle_updater(self, dt):
-        print('hit clock')
 
         self.part1.Ct.text = "Current Cycles: " + str(self.part1.cycles) + "\nPreset: " + str(self.part1.cycleCap)
         self.part1.cycles += 1
         if(int(self.part1.cycles) == int(self.part1.cycleCap)):
             self.cycle_count.cancel()
+  
+    def relay_lowl(self, dt):
+        print("Relay Low")
+   
+ 
+    
+    def relay_high(self, dt):
+
+        print("Relay High")
+
 
     def Pause_Button(self,instance):
 
@@ -118,18 +138,36 @@ class Interact(GridLayout):
             self.cycle_count = None
 
             self.part1.Ct.text = "Current Cycles: " + str(self.part1.cycles) + "\nPreset: " + str(self.part1.cycleCap) + "\nPaused"
-            self.Pause.text = "Resume"            
+            self.Pause.text = "Resume"   
+            print("PAUSED")         
         else:
-            self.cycle_count = Clock.schedule_interval(self.cycle_updater, self.user_input_time)
+            self.cycle_count = Clock.schedule_interval(self.cycle_updater, self.user_input_timef)
             self.Pause.text = "Pause"
+            print("RESUME")
+
+        if self.relay_low:
+            self.relay_low.cancel()
+
+        else:
+            self.relay_low = Clock.schedule_interval(self.relay_howl, self.relay_wacker)
+        if self.relay_howl:
+            self.relay_howl.cancel()
+
+        else:
+            self.relay_howl = Clock.schedule_interval(self.relay_howl, self.relay_wacker2)
+
+           
    
     def Reset_Button(self,instance):
 
         self.part1.cycles = 0
+        print("RESETED")
         if self.cycle_count: 
             self.part1.Ct.text = "Current Cycles: " + str(self.part1.cycles) + "\nPreset: " + str(self.part1.cycleCap)
         else:
             self.part1.Ct.text = "Current Cycles: " + str(self.part1.cycles) + "\nPreset: " + str(self.part1.cycleCap) + "\nPaused"
+
+           
 """class Keypad(GridLayout):
     def __init__(self, *args, **kwargs)
         self.cols = 3
