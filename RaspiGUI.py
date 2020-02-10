@@ -40,6 +40,8 @@ GPIO.output(Relay4, GPIO.LOW)
 
 class Interact(GridLayout):
     cycle_count = None
+    relay_low = None
+    relay_control = 0
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -116,23 +118,19 @@ class Interact(GridLayout):
         self.user_input_timei = int(self.part1.CycleTimeG)
         self.user_input_timef = float(self.user_input_timei/1000)
 
-        self.relay_wacker = float((self.user_input_timef/2)-.001)
-        self.relay_wacker2 = float((self.relay_wacker)+.001)
+        self.relay_wacker = float(self.user_input_timef/2)
 
         if self.cycle_count:
             self.cycle_count.cancel()
             self.cycle_count = None
         if self.relay_low:
             self.relay_low.cancel()
-        if self.relay_howl:
-            self.relay_howl.cancel()
-        if self.cycle_count:
-            self.cycle_count.cancel()
-            self.cycle_count = None
+            self.relay_low = None 
+  
+            
         
-        self.cycle_count = Clock.schedule_interval(self.cycle_updater, self.user_input_time)
+        self.cycle_count = Clock.schedule_interval(self.cycle_updater, self.user_input_timef)
         self.relay_low = Clock.schedule_interval(self.relay_lowl, self.relay_wacker)
-        self.relay_howl = Clock.schedule_interval(self.relay_high, self.relay_wacker2)
         
         with open("prev_details.txt", "w") as f:#Writing previous input to local txt file
             f.write(f"{self.part1.PresetG},{self.part1.CycleTimeG}")
@@ -161,28 +159,27 @@ class Interact(GridLayout):
 
         else:
             self.relay_low = Clock.schedule_interval(self.relay_lowl, self.relay_wacker)
-        if self.relay_howl:
-            self.relay_howl.cancel()
-
-        else:
-            self.relay_howl = Clock.schedule_interval(self.relay_high, self.relay_wacker2)
 
            
     
     def relay_lowl(self, dt):
-        print("Relay Low")
-        GPIO.output(Relay1, GPIO.LOW)
-        GPIO.output(Relay2, GPIO.LOW)
-        GPIO.output(Relay3, GPIO.LOW)
-        GPIO.output(Relay4, GPIO.LOW)
+          if(self.relay_control == 0):
+                GPIO.output(Relay1, GPIO.LOW)
+                GPIO.output(Relay2, GPIO.LOW)
+                GPIO.output(Relay3, GPIO.LOW)
+                GPIO.output(Relay4, GPIO.LOW)
+                print("Relay Low")
+                self.relay_control += 1
+          elif(self.relay_control == 1):
+                GPIO.output(Relay1, GPIO.HIGH)
+                GPIO.output(Relay2, GPIO.HIGH)
+                GPIO.output(Relay3, GPIO.HIGH)
+                GPIO.output(Relay4, GPIO.HIGH)
+                print("relay_high")
+                self.relay_control -= 1
  
     
-    def relay_high(self, dt):
-        print("Relay High")
-        GPIO.output(Relay1, GPIO.HIGH)
-        GPIO.output(Relay2, GPIO.HIGH)
-        GPIO.output(Relay3, GPIO.HIGH)
-        GPIO.output(Relay4, GPIO.HIGH)
+
         
     def Reset_Button(self,instance):
         GPIO.output(Relay1, GPIO.LOW)
@@ -204,6 +201,7 @@ class Interact(GridLayout):
     def createNums(self):
         nums = [1,2,3,4,5,6,7,8,9,'<--','Enter']
         for i in nums"""
+
 class CustomTextInput(TextInput):
     def on_keyboard(self, instance, value):
         if self.keyboard.widget:
