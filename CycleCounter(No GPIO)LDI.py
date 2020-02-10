@@ -19,12 +19,14 @@ from kivy.core.window import Window
 from kivy.uix.widget import Widget 
 Window.fullscreen = True 
 
+relay_control = 0 
 
 
 class Interact(GridLayout):
     cycle_count = None
     relay_low = None
     relay_howl = None
+    relay_control = 0
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -96,8 +98,9 @@ class Interact(GridLayout):
         self.user_input_timei = int(self.part1.CycleTimeG)
         self.user_input_timef = float(self.user_input_timei/1000)
 
-        self.relay_wacker = float((self.user_input_timef/2)-.001)
-        self.relay_wacker2 = float((self.relay_wacker)+.001)
+
+        self.relay_wacker = float(self.user_input_timef/2)
+
 
         if self.cycle_count:
             self.cycle_count.cancel()
@@ -108,7 +111,6 @@ class Interact(GridLayout):
        
         self.cycle_count = Clock.schedule_interval(self.cycle_updater, self.user_input_timef)
         self.relay_low = Clock.schedule_interval(self.relay_lowl, self.relay_wacker)
-        self.relay_howl = Clock.schedule_interval(self.relay_high, self.relay_wacker2)
      
 
         with open("prev_details.txt", "w") as f:#Writing previous input to local txt file
@@ -122,13 +124,14 @@ class Interact(GridLayout):
             self.cycle_count.cancel()
   
     def relay_lowl(self, dt):
-        print("Relay Low")
-   
- 
+         
+        if(self.relay_control == 0):
+                print("Relay Low")
+                self.relay_control += 1
+        elif(self.relay_control == 1):
+                print("relay_high")
+                self.relay_control -= 1
     
-    def relay_high(self, dt):
-
-        print("Relay High")
 
 
     def Pause_Button(self,instance):
