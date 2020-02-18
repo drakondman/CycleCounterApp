@@ -134,6 +134,10 @@ class Interact(GridLayout):
                 print("Too Big Preset")
             elif(self.user_input_timei >= 999999):
                 print("Too Big Time")
+            elif(self.cycleCap <= 0):
+                print("Too Big Preset")
+            elif(self.user_input_timei <= 0):
+                print("Too little Time")
             else:
                 self.part1.cycles = 0
 
