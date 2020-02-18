@@ -78,7 +78,7 @@ class Interact(GridLayout):
         self.logo = Image(source=('logo.png'))
         self.part1.add_widget(self.logo)
 
-        self.part1.add_widget(Label(text=('')))
+        self.part1.add_widget(Label(text=('Minimum Time is 100 miliseconds, Max is 1,000,000\nMinimum Preset is 0, Max is 100,000,000,000'),font_size = 16))
 
         self.part1.PresetL =Label(text=("Preset:\n" + prev_preset),font_size = 18)
         self.part1.add_widget(self.part1.PresetL)
@@ -130,12 +130,12 @@ class Interact(GridLayout):
         else:
             self.user_input_timei = int(self.part1.CycleTimeG)
             self.cycleCap = int(self.part1.PresetG)
-            if(self.cycleCap >= 9999999999999):
+            if(self.cycleCap >= 1000000000001):
                 print("Too Big Preset")
-            elif(self.user_input_timei >= 999999):
+            elif(self.user_input_timei >= 1000001):
                 print("Too Big Time")
             elif(self.cycleCap <= 0):
-                print("Too Big Preset")
+                print("Too little Preset")
             elif(self.user_input_timei <= 0):
                 print("Too little Time")
             else:
