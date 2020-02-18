@@ -180,33 +180,28 @@ class Interact(GridLayout):
                 GPIO.output(Relay3, GPIO.HIGH)
                 GPIO.output(Relay4, GPIO.HIGH)                
                 self.relay_control -= 1
-    
+       
     def Pause_Button(self,instance):
         if(self.user_input_timef == 0):
             print("Nope")
         else:
+
             if self.cycle_count:
                 self.cycle_count.cancel()
                 self.cycle_count = None
 
-                self.part1.Ct.text = "Current Cycles: " + str(self.part1.cycles) + "\nPreset: " + str(self.cycleCap) + "\nPaused"
-                GPIO.output(Relay1, GPIO.LOW)
-                GPIO.output(Relay2, GPIO.LOW)
-                GPIO.output(Relay3, GPIO.LOW)
-                GPIO.output(Relay4, GPIO.LOW)                
-                self.Pause.text = "Resume"   
-                print("PAUSED")
+                if self.relay_low:
+                    self.relay_low.cancel()
+                    self.relay_low = None
 
+                self.part1.Ct.text = "Current Cycles: " + str(self.part1.cycles) + "\nPreset: " + str(self.cycleCap) + "\nPaused"
+                self.Pause.text = "Resume"   
+                print("PAUSED")         
             else:
                 self.cycle_count = Clock.schedule_interval(self.cycle_updater, self.user_input_timef)
+                self.relay_low = Clock.schedule_interval(self.relay_lowl, self.relay_wacker)
                 self.Pause.text = "Pause"
                 print("RESUME")
-
-            if self.relay_low:
-                self.relay_low.cancel()
-
-            else:
-                self.relay_low = Clock.schedule_interval(self.relay_lowl, self.relay_wacker)
                 
     def Reset_Button(self,instance):
         if(self.cycleCap == 0):
