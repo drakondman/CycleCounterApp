@@ -4,8 +4,8 @@ import RPi.GPIO as GPIO
 import kivy
 from kivy.config import Config
 Config.set('kivy', 'keyboard_mode', 'systemanddock')
-Config.set('graphics','width','480')
-Config.set('graphics','height','272')
+Config.set('graphics','width','720')
+Config.set('graphics','height','480')
 from kivy.app import App   
 from kivy.uix.label import Label
 from kivy.uix.gridlayout import GridLayout
@@ -19,9 +19,7 @@ from kivy.uix.image import Image
 from kivy.uix.popup import Popup
 from kivy.uix.vkeyboard import VKeyboard
 from kivy.core.window import Window
-from kivy.uix.widget import Widget 
-Window.fullscreen = True 
-
+from kivy.uix.widget import Widget
 relay_control = 0 
 GPIO.setwarnings(False)
 
@@ -58,7 +56,7 @@ class Interact(GridLayout):
 
     cycle_count = None
     relayMasterController = None
-
+    cycleCapCon = 0
     cycleCap = 0
     cycles = 0
     extendTimeGlobal = 0.0
@@ -70,7 +68,7 @@ class Interact(GridLayout):
         super().__init__(**kwargs)
         self.cols = 1
 
-        self.part1 = GridLayout(cols=2, row_force_default=True, row_default_height=100,rows = 6,spacing = [1,1])
+        self.part1 = GridLayout(cols=2, row_force_default=True, row_default_height=80,rows = 6,spacing = [1,1])
         
         self.part2 = GridLayout(cols=4, row_force_default=True, row_default_height=65,rows = 2)
     
@@ -86,6 +84,7 @@ class Interact(GridLayout):
             prev_preset = ""
             prev_timeE = ""
             prev_timeR = ""
+            
         self.logo = Image(source=('logo.png'))
         self.part1.add_widget(self.logo)
 
@@ -103,7 +102,7 @@ class Interact(GridLayout):
 
         self.part1.retractTimeL = Label(text=("Time to Retract:\n"+prev_timeR + "ms"),font_size = 18, height = 4)
         self.part1.add_widget(self.part1.retractTimeL)
-        self.part1.retractTimeI = CustomTextInput(text=(prev_timeE), multiline=False, background_color = [1,1,1,.95], width= 200, height = 200)
+        self.part1.retractTimeI = CustomTextInput(text=(prev_timeR), multiline=False, background_color = [1,1,1,.95], width= 200, height = 200)
         self.part1.add_widget(self.part1.retractTimeI)
 
         self.part1.Ct = Label(text=("Current Cycles:\n"),font_size = 18)
@@ -139,19 +138,20 @@ class Interact(GridLayout):
         elif(self.part1.extendTimeIU == ''):
             print("No fields Full Cycle Time")
         elif(self.part1.extendTimeIU in self.tooFastArray):
-            print("Too Fast Slow Down")
+            print("Too Fast SHIGH Down")
         elif(self.part1.extendTimeIU == '0'):
             print("sorry but 0 is not vaild")
         elif(self.part1.retractTimeIU == ''):
             print("No fields Full Cycle Time")
         elif(self.part1.retractTimeIU in self.tooFastArray):
-            print("Too Fast Slow Down")
+            print("Too Fast slow Down")
         elif(self.part1.retractTimeIU == '0'):
             print("sorry but 0 is not vaild")
         else:
             self.user_input_extend = int(self.part1.extendTimeIU)
             self.user_input_retract = int(self.part1.retractTimeIU)
-            self.cycleCap = int(self.part1.PresetG)
+            self.cycleCap = int(self.part1.PresetG)            
+            self.cycleCapCon = int(self.part1.PresetG)+1            
 
             if(self.cycleCap >= 1000000000001):
                 print("Too Big Preset")
@@ -169,7 +169,7 @@ class Interact(GridLayout):
                 if self.relayMasterController:
                     self.relayMasterController.cancel()
                 self.cycles = 0
-
+                
                 self.part1.PresetL.text = ("Preset:\n" + self.part1.PresetG)
                 self.part1.extendTimeL.text = ("Extend Time:\n" + self.part1.extendTimeIU + "ms") 
                 self.part1.retractTimeL.text = ("Retract Time:\n" + self.part1.retractTimeIU + "ms")
@@ -195,10 +195,10 @@ class Interact(GridLayout):
             print(self.relay_control1)
             if(self.relay_control1 <= self.extendTimeGlobal):
                 print("Current Extend")
-                GPIO.output(Relay1, GPIO.HIGH)
-                GPIO.output(Relay2, GPIO.HIGH)
-                GPIO.output(Relay3, GPIO.HIGH)
-                GPIO.output(Relay4, GPIO.HIGH)
+                GPIO.output(Relay1, GPIO.LOW)
+                GPIO.output(Relay2, GPIO.LOW)
+                GPIO.output(Relay3, GPIO.LOW)
+                GPIO.output(Relay4, GPIO.LOW)
             else:
                 print("switching")
                 self.relay_master += 1
@@ -209,33 +209,36 @@ class Interact(GridLayout):
             print(self.relay_control2)
             if(self.relay_control2 <= self.retractTimeGlobal):
                 print("Current Retract")
-                GPIO.output(Relay1, GPIO.LOW)
-                GPIO.output(Relay2, GPIO.LOW)
-                GPIO.output(Relay3, GPIO.LOW)
-                GPIO.output(Relay4, GPIO.LOW)
+                GPIO.output(Relay1, GPIO.HIGH)
+                GPIO.output(Relay2, GPIO.HIGH)
+                GPIO.output(Relay3, GPIO.HIGH)
+                GPIO.output(Relay4, GPIO.HIGH)
             else:
                 print("switching")
                 self.relay_master += 1
                 self.relay_control2 = 0.0 
         elif(self.relay_master == 2):
             self.cycles += 1    
-            self.part1.Ct.text = "Current Cycles: " + str(self.cycles) + "\nPreset: " + str(self.cycleCap)
-            if(self.cycles == self.cycleCap):
+            if(self.cycles >= self.cycleCapCon):
+                print("Stopped")
+                print(self.cycleCapCon)
                 self.relayMasterController.cancel()
+                GPIO.output(Relay1, GPIO.HIGH)
+                GPIO.output(Relay2, GPIO.HIGH)
+                GPIO.output(Relay3, GPIO.HIGH)
+                GPIO.output(Relay4, GPIO.HIGH)
             else:
+                self.part1.Ct.text = "Current Cycles: " + str(self.cycles) + "\nPreset: " + str(self.cycleCap)               
                 self.relay_master -= 2
                 print("Completed 1 Cycle")
 
-
-    def cycle_updater(self, dt):
-
-        self.part1.Ct.text = "Current Cycles: " + str(self.part1.cycles) + "\nPreset: " + str(self.cycleCap)
-        self.part1.cycles += 1
-        if(int(self.part1.cycles) == int(self.cycleCap)):
-            self.cycle_count.cancel()
   
 
     def Pause_Button(self,instance):
+        GPIO.output(Relay1, GPIO.HIGH)
+        GPIO.output(Relay2, GPIO.HIGH)
+        GPIO.output(Relay3, GPIO.HIGH)
+        GPIO.output(Relay4, GPIO.HIGH)
         if(self.applyclicked == False):
             print("Nope")
         else:
@@ -255,51 +258,36 @@ class Interact(GridLayout):
         if(self.cycleCap == 0):
             print("NO RESET")
         else:
-            self.part1.cycles = 0
+            self.cycles = 0
             print("RESETED")
             if self.cycle_count: 
-                self.part1.Ct.text = "Current Cycles: " + str(self.part1.cycles) + "\nPreset: " + str(self.cycleCap)
+                self.part1.Ct.text = "Current Cycles: " + str(self.cycles) + "\nPreset: " + str(self.cycleCap)
             else:
-                self.part1.Ct.text = "Current Cycles: " + str(self.part1.cycles) + "\nPreset: " + str(self.cycleCap) + "\nPaused"
-
-
+                self.part1.Ct.text = "Current Cycles: " + str(self.cycles) + "\nPreset: " + str(self.cycleCap) + "\nPaused"
 
     def manual_extend_retract(self,isinstance):
         if(self.extendRetract == 0):
             print("Manual Extend")
             self.manual_re.text = "Manual Retract"
             self.extendRetract += 1
-            GPIO.output(Relay1, GPIO.HIGH)
-            GPIO.output(Relay2, GPIO.HIGH)
-            GPIO.output(Relay3, GPIO.HIGH)
-            GPIO.output(Relay4, GPIO.HIGH)
-
-        else: 
-            print("Manual Retract")
-            self.manual_re.text = "Manual Extend"
-            self.extendRetract -= 1
             GPIO.output(Relay1, GPIO.LOW)
             GPIO.output(Relay2, GPIO.LOW)
             GPIO.output(Relay3, GPIO.LOW)
             GPIO.output(Relay4, GPIO.LOW)
-
-           
-"""class Keypad(GridLayout):
-    def __init__(self, *args, **kwargs)
-        self.cols = 3
-        self.spacing = 10 
-        self.createNums()
-    def createNums(self):
-        nums = [1,2,3,4,5,6,7,8,9,0]
-        for i in nums"""
-
+        else: 
+            print("Manual Retract")
+            self.manual_re.text = "Manual Extend"
+            self.extendRetract -= 1
+            GPIO.output(Relay1, GPIO.HIGH)
+            GPIO.output(Relay2, GPIO.HIGH)
+            GPIO.output(Relay3, GPIO.HIGH)
+            GPIO.output(Relay4, GPIO.HIGH)
 
 class CustomTextInput(TextInput):
     def on_keyboard(self, instance, value):
         if self.keyboard.widget:
             vkeyboard = self.keyboard.widget
             vkeyboard.layout = 'keynums.json'
-        
 class GUI(App):
     def build(self):
 
@@ -308,3 +296,4 @@ class GUI(App):
 if __name__ =="__main__":
 
     GUI().run() 
+
