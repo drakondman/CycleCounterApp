@@ -1,4 +1,3 @@
-
 import os
 import time
 import kivy
@@ -111,14 +110,20 @@ class Relay_Settings(Screen):
         if os.path.isfile("relay_data.txt"):#Saves previous input to a txt file and redisplays it on launch
             with open("relay_data.txt", "r") as f:
                 d = f.read().split(",")
-               
-        self.part2 =  GridLayout(cols=3, row_force_default=True, row_default_height=100,rows = 6,spacing = [1,1])
-        self.part3 =  GridLayout(cols=4, row_force_default=True, row_default_height=50,rows = 1,spacing = [1,1])
+                prev_preset = d[0]
+                prev_timeE = d[1]
+                prev_timeR = d[2]
+        else:
+            prev_preset = ""
+            prev_timeE = ""
+            prev_timeR = ""
 
+        self.part2 =  GridLayout(cols=3, row_force_default=True, row_default_height=90,rows = 8,spacing = [1,1])
+        self.part3 =  GridLayout(cols=4, row_force_default=True, row_default_height=50,rows = 1,spacing = [1,1])
+        self.logo = Image(source=('logo.png'))
+        self.part2.add_widget(self.logo)
         self.part2.add_widget(Label(text = "Relay Settings"))
-        self.MainMenu = Button(text = "Main Menu",font_size = 15)
-        self.MainMenu.bind(on_press=self.Main_Menu_Button)
-        self.part2.add_widget(self.MainMenu)
+
 
         self.Relay1_Button = Button(text = "Relay 1", font_size = 18)
         self.Relay1_Button.bind(on_press=self.Relay1_Press)
@@ -147,7 +152,7 @@ class Relay_Settings(Screen):
         self.preset = Label(text="Preset: ",font_size = 18)
         self.part2.add_widget(self.preset)
         
-        self.presetI = CustomTextInput(multiline=False,font_size = 18)
+        self.presetI = CustomTextInput(multiline=False,font_size = 18,text = prev_preset)
         self.part2.add_widget(self.presetI)
         
         self.part2.add_widget(Label(text = ""))
@@ -155,7 +160,7 @@ class Relay_Settings(Screen):
         self.retract_time = Label(text = "Retract Time: ")
         self.part2.add_widget(self.retract_time)
 
-        self.retract_timeI = CustomTextInput(multiline = False,font_size = 18)
+        self.retract_timeI = CustomTextInput(multiline = False,font_size = 18, text = prev_timeR)
         self.part2.add_widget(self.retract_timeI)
 
         self.part2.add_widget(Label(text = ""))
@@ -163,12 +168,17 @@ class Relay_Settings(Screen):
         self.extend_time = Label(text = "Extend Time: ")
         self.part2.add_widget(self.extend_time)
 
-        self.extend_timeI = CustomTextInput(multiline = False,font_size = 18)
+        self.extend_timeI = CustomTextInput(multiline = False,font_size = 18,text = prev_timeE)
         self.part2.add_widget(self.extend_timeI)
 
         self.submitB = Button(text = "SUBMIT",font_size = 18)
         self.submitB.bind(on_press =self.Submit)
         self.part2.add_widget(self.submitB)
+    
+        self.MainMenu = Button(text = "Main Menu",font_size = 15)
+        self.MainMenu.bind(on_press=self.Main_Menu_Button)
+        self.part2.add_widget(self.MainMenu)
+
         self.add_widget(self.part2)
 
 
@@ -186,18 +196,42 @@ class Relay_Settings(Screen):
         self.current_relay.text = "Current Relay: Relay 4"
 
     def Submit(self,instance):
-        if(self.current_relay == 1):
-            self.r1p = int(self.presetI.txt)
-            self.r1r = int(self.retract_timeI.txt)
-            self.r1e = int(self.extend_timeI.txt)
-
-            self.sr1p = str(self.r1p)
-            self.sr1r = str(self.r1r)
-            self.sr1e = str(self.r1e)
+        print(self.relay_current)
+        if(self.relay_current == 1):
+            self.r1p = int(self.presetI.text)
+            self.r1r = int(self.retract_timeI.text)
+            self.r1e = int(self.extend_timeI.text)
             
             with open("relay_data.txt", "w") as f:#Writing previous input to local txt file
-                f.write(f"{self.r1p},{self.r1r},{self.r1e}")
+                f.write(f"{self.r1p},{self.r1r},{self.r1e},{self.r2p},{self.r2r},{self.r2e},{self.r3p},{self.r3r},{self.r3e},{self.r4p},{self.r4r},{self.r4e}")
             print(self.r1p,self.r1r,self.r1e)
+        
+        elif(self.relay_current == 2):
+            self.r2p = int(self.presetI.text)
+            self.r2r = int(self.retract_timeI.text)
+            self.r2e = int(self.extend_timeI.text)
+            
+            with open("relay_data.txt", "w") as f:#Writing previous input to local txt file
+                f.write(f"{self.r1p},{self.r1r},{self.r1e},{self.r2p},{self.r2r},{self.r2e},{self.r3p},{self.r3r},{self.r3e},{self.r4p},{self.r4r},{self.r4e}")
+            print(self.r2p,self.r2r,self.r2e)     
+
+        elif(self.relay_current == 3):
+            self.r3p = int(self.presetI.text)
+            self.r3r = int(self.retract_timeI.text)
+            self.r3e = int(self.extend_timeI.text)
+            
+            with open("relay_data.txt", "w") as f:#Writing previous input to local txt file
+                f.write(f"{self.r1p},{self.r1r},{self.r1e},{self.r2p},{self.r2r},{self.r2e},{self.r3p},{self.r3r},{self.r3e},{self.r4p},{self.r4r},{self.r4e}")
+            print(self.r3p,self.r3r,self.r3e)  
+
+        elif(self.relay_current == 4):
+            self.r4p = int(self.presetI.text)
+            self.r4r = int(self.retract_timeI.text)
+            self.r4e = int(self.extend_timeI.text)
+
+            with open("relay_data.txt", "w") as f:#Writing previous input to local txt file
+                f.write(f"{self.r1p},{self.r1r},{self.r1e},{self.r2p},{self.r2r},{self.r2e},{self.r3p},{self.r3r},{self.r3e},{self.r4p},{self.r4r},{self.r4e}")
+            print(self.r4p,self.r4r,self.r4e)        
 
     def Main_Menu_Button(self, instance):
         app = App.get_running_app()
