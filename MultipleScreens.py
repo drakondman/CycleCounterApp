@@ -28,34 +28,45 @@ class Main_Menu(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.part1 = GridLayout(cols=3, row_force_default=True, row_default_height=150,rows = 6,spacing = [4,4])
+        self.part1 = GridLayout(cols=3, row_force_default=True, row_default_height=145,rows = 6,spacing = [4,4])
 
         self.logo = Image(source=('logo.png'))
+        self.logo2 = Image(source=('logo.png'))
+        self.logo3 = Image(source=('logo.png'))
+        self.logo4 = Image(source=('logo.png'))
+        self.logo5 = Image(source=('logo.png'))
+        self.logo6 = Image(source=('logo.png'))
+        self.logo7 = Image(source=('logo.png'))
+        self.logo8 = Image(source=('logo.png'))
+
         self.part1.add_widget(self.logo)
 
         self.part1.add_widget(Label(text=('Main Menu'),font_size = 40))
     
-        self.part1.add_widget(Label(text=('')))
-        self.part1.add_widget(Label(text=('')))
+        self.part1.add_widget(self.logo2)
+        self.part1.add_widget(self.logo5)
 
         self.TaskManager = Button(text = "Task Manager",font_size = 40) 
         self.TaskManager.bind(on_press=self.Task_button)
         self.part1.add_widget(self.TaskManager)
+        self.part1.add_widget(self.logo6)
+
         
-        self.part1.add_widget(Label(text=('')))
-        self.part1.add_widget(Label(text=('')))
+        self.part1.add_widget(self.logo7)
 
         self.TaskSettingsB = Button(text = "Task Settings",font_size = 30)
         self.TaskSettingsB.bind(on_press=self.Task_Settings_Button)
         self.part1.add_widget(self.TaskSettingsB)
 
-        self.part1.add_widget(Label(text=('')))
-        self.part1.add_widget(Label(text=('')))
+        self.part1.add_widget(self.logo8)
+
+        self.part1.add_widget(self.logo3)
 
         self.CalibrationScreenB = Button(text = "Calibration Screen", font_size =30 )
         self.CalibrationScreenB.bind(on_press=self.Calibration_Screen_Button)
         self.part1.add_widget(self.CalibrationScreenB)
-        
+        self.part1.add_widget(self.logo4)
+
         self.add_widget(self.part1)
 
     def Task_button(self, instance):
@@ -69,10 +80,11 @@ class Main_Menu(Screen):
         app = App.get_running_app()
         app.sm.current = 'calibration_screen' 
 
-class Task_Manager(Screen):
+class Task_Manager(Screen): # Start and run the tasks you configured on the other screen
+    
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.part2 =  GridLayout(cols=3, row_force_default=False, row_default_height=100,spacing = [1,2], width = 100)
+        self.part2 =  GridLayout(cols=3, row_force_default=False, row_default_height=100,spacing = [2,2], width = 100)
         self.part4 = GridLayout(cols =2,  row_force_default=True, row_default_height=50,spacing = [1,1], width = 50)
         self.part3 = GridLayout(cols =2,  row_force_default=True, row_default_height=60,spacing = [1,1], width = 50)
         self.part5 = GridLayout(cols =1,  row_force_default=True, row_default_height=50,spacing = [1,1], width = 50)
@@ -80,6 +92,8 @@ class Task_Manager(Screen):
         self.part7 = GridLayout(cols =2,  row_force_default=True, row_default_height=18,spacing = [1,1], width = 50)
         self.part8 = GridLayout(cols =3,  row_force_default=True, row_default_height=60,spacing = [1,1], col_default_width = 150)
         self.part9 = GridLayout(cols =1,  row_force_default=True, row_default_height=60,spacing = [1,1], col_default_width = 150)
+        self.part10 = GridLayout(cols =2,  row_force_default=True, row_default_height=60,spacing = [1,1], col_default_width = 40)
+
 
         self.logo = Image(source=('logo.png'),width = 200, height = 200)
         self.part2.add_widget(self.logo)
@@ -117,16 +131,34 @@ class Task_Manager(Screen):
         self.part3.add_widget(self.pause)
 
         self.part2.add_widget(self.part3)
-        self.part2.add_widget(Label(text = ""))
+
+
+        self.task1button = Button(text = "Task 1", font_size = 18,width = 50, height = 50)
+        self.task1button.bind(on_press = self.task1B)
+        self.part10.add_widget(self.task1button)
+     
+        self.part10.add_widget(Label(text = ""))
+
+        self.task2button = Button(text = "Task 2", font_size = 18,width = 50, height = 50)
+        self.task2button.bind(on_press = self.task2B)
+        self.part10.add_widget(self.task2button)
+
+        self.part10.add_widget(Label(text = ""))
+
+        self.task3button = Button(text = "Task 3", font_size = 18,width = 50, height = 50)
+        self.task3button.bind(on_press = self.task3B)
+        self.part10.add_widget(self.task3button)
+       
+        self.part2.add_widget(self.part10)
+        self.currentTask = Label(text = "Current Task: Task 1")
+        self.part2.add_widget(self.currentTask)
 
         self.part2.add_widget(Label(text = ""))
+        self.part2.add_widget(Label(text = "You can edit the task settings for these\n tasks in the (Task Settings Screen)."))
         self.part2.add_widget(Label(text = ""))
         self.part2.add_widget(Label(text = ""))
-        self.part2.add_widget(Label(text = ""))
-        self.part2.add_widget(Label(text = ""))
-        self.part2.add_widget(Label(text = ""))
-        self.part2.add_widget(Label(text = ""))
-        self.part2.add_widget(Label(text = ""))
+
+
 
         self.sendhome = Button(text = "Send Back Home", font_size = 18, background_color = [1,0,0,1], color = [0,0,0,1],width = 50, height = 50)
         self.pause.bind(on_press = self.Send_Home)
@@ -150,6 +182,15 @@ class Task_Manager(Screen):
 
         
         self.add_widget(self.part2)
+    def task1B(self, instance):
+        self.currentTask.text = "Current Task: Task 1"
+        
+    def task2B(self, instance):
+        self.currentTask.text = "Current Task: Task 2"
+
+    def task3B(self, instance):
+        self.currentTask.text = "Current Task: Task 3"
+
 
     def Reset(self, instance):
         pass 
@@ -160,7 +201,7 @@ class Task_Manager(Screen):
     def Pause(self, instance):
         pass
 
-    def Send_Home(self, instance):
+    def Send_Home(self, instance): # send to x-0 
         pass
 
     def Task_Settings_Button(self, instance):
@@ -176,7 +217,7 @@ class Task_Manager(Screen):
         app = App.get_running_app()
         app.sm.current = 'menu'
 
-class Task_Settings(Screen):
+class Task_Settings(Screen):# 3 Tasks you can edit settings on
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.part2 =  GridLayout(cols=3, row_force_default=True, row_default_height=100,rows = 6,spacing = [1,1])
@@ -187,11 +228,11 @@ class Task_Settings(Screen):
             
         self.add_widget(self.part2)
 
-    def Main_Menu_Button(self, instance):
+    def Main_Menu_Button(self, instance):#Menu 
         app = App.get_running_app()
         app.sm.current = 'menu'
 
-class Calibration_Screen(Screen):
+class Calibration_Screen(Screen): #Screen For Calibration of X rail and Positioning Manual Control 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.part2 =  GridLayout(cols=3, row_force_default=True, row_default_height=100,rows = 6,spacing = [1,1])
