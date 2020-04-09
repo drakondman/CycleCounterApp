@@ -21,6 +21,26 @@ from kivy.lang import builder
 from kivy.uix.screenmanager import ScreenManager, Screen
 Window.fullscreen = True
 
+"""GPIO.setwarnings(False)
+
+GPIO.setmode(GPIO.BOARD)
+
+Relay1 = 37
+Relay2 = 33
+Relay3 = 36
+Relay4 = 18
+
+GPIO.setup(Relay1, GPIO.OUT)
+GPIO.setup(Relay2, GPIO.OUT)
+GPIO.setup(Relay3, GPIO.OUT)
+GPIO.setup(Relay4, GPIO.OUT)
+
+GPIO.output(Relay1, GPIO.LOW)
+GPIO.output(Relay2, GPIO.LOW)
+GPIO.output(Relay3, GPIO.LOW)
+GPIO.output(Relay4, GPIO.LOW)"""
+
+
 class Main_Menu(Screen):
     cycle_count = None
 
@@ -69,41 +89,8 @@ class Main_Menu(Screen):
 
     
 class Relay_Runner(Screen):
-    if os.path.isfile("relay_data.txt"):#Saves previous input to a txt file and redisplays it on launch
-        with open("relay_data.txt", "r") as f:
-                d = f.read().split(",")
-                r1p = d[0]
-                r1r = d[1]
-                r1e = d[2]
 
-                r2p = d[3]
-                r2r = d[4]
-                r2e = d[5]
 
-                r3p = d[6]
-                r3r = d[7]
-                r3e = d[8]
-
-                r4p = d[9]
-                r4r = d[10]
-                r4e = d[11]
-
-    else:
-        r1p = ""
-        r1r = ""
-        r1e = ""
-
-        r2p = ""
-        r2r = ""
-        r2e = ""
-
-        r3p = ""
-        r3r = ""
-        r3e = ""
-
-        r4p = ""
-        r4r = ""
-        r4e = ""
     mrec1 = 0
     mrec2 = 0 
     mrec3 = 0
@@ -168,6 +155,40 @@ class Relay_Runner(Screen):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        if os.path.isfile("relay_data.txt"):#Saves previous input to a txt file and redisplays it on launch
+            with open("relay_data.txt", "r") as f:
+                d = f.read().split(",")
+                self.r1p = d[0]
+                self.r1r = d[1]
+                self.r1e = d[2]
+
+                self.r2p = d[3]
+                self.r2r = d[4]
+                self.r2e = d[5]
+
+                self.r3p = d[6]
+                self.r3r = d[7]
+                self.r3e = d[8]
+
+                self.r4p = d[9]
+                self.r4r = d[10]
+                self.r4e = d[11]
+                f.flush()
+                f.close()
+        else:
+            self.r1p = ""
+            self.r1r = ""
+            self.r1e = ""
+            self.r2p = ""
+            self.r2r = ""
+            self.r2e = ""
+            self.r3p = ""
+            self.r3r = ""
+            self.r3e = ""
+            self.r4p = ""
+            self.r4r = ""
+            self.r4e = ""
+
         self.part2 =  GridLayout(cols=4, row_force_default=True, row_default_height=100,rows = 8)
         self.part3 =  GridLayout(cols=1, row_force_default=True, row_default_height=25)
         self.part4 =  GridLayout(cols=1, row_force_default=True, row_default_height=25)
@@ -770,6 +791,8 @@ class Relay_Settings(Screen):
             
             with open("relay_data.txt", "w") as f:#Writing previous input to local txt file
                 f.write(f"{self.r1p},{self.r1r},{self.r1e},{self.r2p},{self.r2r},{self.r2e},{self.r3p},{self.r3r},{self.r3e},{self.r4p},{self.r4r},{self.r4e}")
+                f.flush()
+                f.close()
             print(self.r1p,self.r1r,self.r1e)
         
         elif(self.relay_current == 2):
@@ -797,6 +820,8 @@ class Relay_Settings(Screen):
 
             with open("relay_data.txt", "w") as f:#Writing previous input to local txt file
                 f.write(f"{self.r1p},{self.r1r},{self.r1e},{self.r2p},{self.r2r},{self.r2e},{self.r3p},{self.r3r},{self.r3e},{self.r4p},{self.r4r},{self.r4e}")
+                f.flush() 
+                f.close()
             print(self.r4p,self.r4r,self.r4e)        
 
     def Main_Menu_Button(self, instance):
