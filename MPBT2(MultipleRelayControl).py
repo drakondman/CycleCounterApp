@@ -19,7 +19,7 @@ from kivy.core.window import Window
 from kivy.uix.widget import Widget 
 from kivy.lang import builder
 from kivy.uix.screenmanager import ScreenManager, Screen
-Window.fullscreen = True
+#Window.fullscreen = True
 
 """GPIO.setwarnings(False)
 
@@ -41,118 +41,95 @@ GPIO.output(Relay3, GPIO.LOW)
 GPIO.output(Relay4, GPIO.LOW)"""
 
 
-class Main_Menu(Screen):
+class Main_Menu(Screen):#Class that displays the main menu screen
     cycle_count = None
-
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs):#inital Main screen graphics
         super().__init__(**kwargs)
-
-        self.part1 = GridLayout(cols=3, row_force_default=True, row_default_height=145,rows = 6,spacing = [4,4])
-
+        self.part1 = GridLayout(cols=3, row_force_default=True, row_default_height=145,rows = 6,spacing = [4,4])#Setting the Gridlayout and paramaters
         self.logo = Image(source=('logo.png'))
-
-
         self.part1.add_widget(self.logo)
-
         self.part1.add_widget(Label(text=('Main Menu'),font_size = 40))
-    
+        self.part1.add_widget(Label(text="")) #Blank Label acts as a empty box in the gridlayout
         self.part1.add_widget(Label(text=""))
-        self.part1.add_widget(Label(text=""))
-
-
-
         self.Relay_RunnerB = Button(text = "Relay Runner",font_size = 40) 
         self.Relay_RunnerB.bind(on_press=self.Relay_Runner_button)
         self.part1.add_widget(self.Relay_RunnerB)
         self.part1.add_widget(Label(text=""))
         self.part1.add_widget(Label(text=""))
-
-
         self.Relay_SettingsB = Button(text = "Relay Settings",font_size = 18)
         self.Relay_SettingsB.bind(on_press=self.Relay_Settings_Button)
         self.part1.add_widget(self.Relay_SettingsB)
-
         self.part1.add_widget(Label(text=""))
         self.part1.add_widget(Label(text=""))
-
-    
         self.part1.add_widget(Label(text=""))
-
         self.add_widget(self.part1)
-
-    def Relay_Runner_button(self, instance):
+    def Relay_Runner_button(self, instance): #Function for Screen change button
         app = App.get_running_app()
         app.sm.current = 'Relay_Runner' 
-    def Relay_Settings_Button(self, instance):
+    def Relay_Settings_Button(self, instance):#Fuction for Screen Change Button
         app = App.get_running_app()
         app.sm.current = 'Relay_Settings' 
-
-    
-class Relay_Runner(Screen):
-
-
+class Relay_Runner(Screen):#Class for the screen that runs the relays
+    r1p = ""#varibles from the relay settings page that control the times and presets
+    r1r = ""
+    r1e = ""
+    r2p = ""
+    r2r = ""
+    r2e = ""
+    r3p = ""
+    r3r = "" 
+    r3e = ""
+    r4p = ""
+    r4r = ""
+    r4e = ""
     mrec1 = 0
     mrec2 = 0 
     mrec3 = 0
     mrec4 = 0
-
     relay_Mcontroller1 = None
     relay_Mcontroller2 = None
     relay_Mcontroller3 = None
     relay_Mcontroller4 = None
-
     cycleCap1 = 0
     cycleCap2 = 0
     cycleCap3 = 0
     cycleCap4 = 0
-
     cycles1 = 0
     cycles2 = 0
     cycles3 = 0
     cycles4 = 0
-
     etg1 = 0.0
     etg2 = 0.0
     etg3 = 0.0
     etg4 = 0.0
-
     rtg1 = 0.0
     rtg2 = 0.0
     rtg3 = 0.0
     rtg4 = 0.0
-
     cg1 = .00001
     cg2 = .00001
     cg3 = .00001
     cg4 = .00001
-
     r1rc1 = 0.0
     r1rc2 = 0.0
     r1rc3 = 0.0
-
     r2rc1 = 0.0
     r2rc2 = 0.0
     r2rc3 = 0.0
-
     r3rc1 = 0.0
     r3rc2 = 0.0
     r3rc3 = 0.0
-
     r4rc1 = 0.0
     r4rc2 = 0.0
     r4rc3 = 0.0
-
     r1rcM = 0
     r2rcM = 0
     r3rcM = 0
     r4rcM = 0
-
     sC1 = False
     sC2 = False
     sC3 = False
     sC4 = False
-   
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         if os.path.isfile("relay_data.txt"):#Saves previous input to a txt file and redisplays it on launch
@@ -161,15 +138,12 @@ class Relay_Runner(Screen):
                 self.r1p = d[0]
                 self.r1r = d[1]
                 self.r1e = d[2]
-
                 self.r2p = d[3]
                 self.r2r = d[4]
                 self.r2e = d[5]
-
                 self.r3p = d[6]
                 self.r3r = d[7]
                 self.r3e = d[8]
-
                 self.r4p = d[9]
                 self.r4r = d[10]
                 self.r4e = d[11]
@@ -188,24 +162,20 @@ class Relay_Runner(Screen):
             self.r4p = ""
             self.r4r = ""
             self.r4e = ""
-
-        self.part2 =  GridLayout(cols=4, row_force_default=True, row_default_height=100,rows = 8)
+        self.part2 =  GridLayout(cols=4, row_force_default=True, row_default_height=100,rows = 8) #Setting Main grid and subgrid layouts for the task run screen
         self.part3 =  GridLayout(cols=1, row_force_default=True, row_default_height=25)
         self.part4 =  GridLayout(cols=1, row_force_default=True, row_default_height=25)
         self.part5 =  GridLayout(cols=1, row_force_default=True, row_default_height=25)
         self.part6 =  GridLayout(cols=1, row_force_default=True, row_default_height=25)
-
         self.part7 =  GridLayout(cols=2, row_force_default=True, row_default_height=20,rows = 2)
         self.part8 =  GridLayout(cols=2, row_force_default=True, row_default_height=20,rows = 2)
         self.part9 =  GridLayout(cols=2, row_force_default=True, row_default_height=20,rows = 2)
         self.part10 =  GridLayout(cols=2, row_force_default=True, row_default_height=20,rows = 2)
-
         self.logo = Image(source=('logo.png'))
         self.part2.add_widget(self.logo)
         self.part2.add_widget(Label(text = "Task Runner"))
         self.part2.add_widget(Label(text = ""))
         self.part2.add_widget(Label(text = ""))
-
         self.part3.add_widget(Label(text = "Relay 1"))
         self.part3.add_widget(Label(text = ("Preset: " + self.r1p)))
         self.part3.add_widget(Label(text = ("Extend Time: " + self.r1e)))
@@ -215,22 +185,17 @@ class Relay_Runner(Screen):
         self.part3.add_widget(self.mer1)
         self.r1c = Label(text = "Current Cycles: ")
         self.part3.add_widget(self.r1c)
-
         self.r1pause = Button(text = "Pause", background_color = [1,0,0,1], color = [0,0,0,1])
         self.r1pause.bind(on_press = self.r1Pause)
         self.part7.add_widget(self.r1pause)
-
         self.r1reset = Button(text = "Reset", background_color = [1,0,0,1], color = [0,0,0,1])
         self.r1reset.bind(on_press = self.r1Reset,)
         self.part7.add_widget(self.r1reset)
-
         self.r1start = Button(text = "Start", background_color = [0,1,0,1],color = [0,0,0,1])
         self.r1start.bind(on_press = self.r1Start)
         self.part7.add_widget(self.r1start)
-
         self.part3.add_widget(self.part7)
         self.part2.add_widget(self.part3)
-
         self.part4.add_widget(Label(text = "Relay 2"))
         self.part4.add_widget(Label(text = ("Preset: " + self.r2p)))
         self.part4.add_widget(Label(text = ("Extend Time: " + self.r2e)))
@@ -240,22 +205,17 @@ class Relay_Runner(Screen):
         self.part4.add_widget(self.mer2)
         self.r2c = Label(text = "Current Cycles: ")
         self.part4.add_widget(self.r2c)
-
         self.r2pause = Button(text = "Pause", background_color = [1,0,0,1], color = [0,0,0,1])
         self.r2pause.bind(on_press = self.r2Pause)
         self.part8.add_widget(self.r2pause)
-
         self.r2reset = Button(text = "Reset", background_color = [1,0,0,1], color = [0,0,0,1])
         self.r2reset.bind(on_press = self.r2Reset)
         self.part8.add_widget(self.r2reset)
-
         self.r2start = Button(text = "Start", background_color = [0,1,0,1],color = [0,0,0,1])
         self.r2start.bind(on_press = self.r2Start)
         self.part8.add_widget(self.r2start)
-
         self.part4.add_widget(self.part8)
         self.part2.add_widget(self.part4)
-        
         self.part5.add_widget(Label(text = "Relay 3"))
         self.part5.add_widget(Label(text = ("Preset: " + self.r3p)))
         self.part5.add_widget(Label(text = ("Extend Time: " + self.r3e)))
@@ -265,22 +225,17 @@ class Relay_Runner(Screen):
         self.part5.add_widget(self.mer3)
         self.r3c = Label(text = "Current Cycles: ")
         self.part5.add_widget(self.r3c)
-
         self.r3pause = Button(text = "Pause", background_color = [1,0,0,1], color = [0,0,0,1])
         self.r3pause.bind(on_press = self.r3Pause)
         self.part9.add_widget(self.r3pause)
-
         self.r3reset = Button(text = "Reset", background_color = [1,0,0,1], color = [0,0,0,1])
         self.r3reset.bind(on_press = self.r3Reset)
         self.part9.add_widget(self.r3reset)
-
         self.r3start = Button(text = "Start", background_color = [0,1,0,1],color = [0,0,0,1])
         self.r3start.bind(on_press = self.r3Start)
         self.part9.add_widget(self.r3start)
-
         self.part5.add_widget(self.part9)
         self.part2.add_widget(self.part5)
-
         self.part6.add_widget(Label(text = "Relay 4"))
         self.part6.add_widget(Label(text = ("Preset: " + self.r4p)))
         self.part6.add_widget(Label(text = ("Extend Time: " + self.r4e)))
@@ -290,22 +245,17 @@ class Relay_Runner(Screen):
         self.part6.add_widget(self.mer4)
         self.r4c = Label(text = "Current Cycles: ")
         self.part6.add_widget(self.r4c)
-
         self.r4pause = Button(text = "Pause", background_color = [1,0,0,1], color = [0,0,0,1])
         self.r4pause.bind(on_press = self.r4Pause)
         self.part10.add_widget(self.r4pause)
-
         self.r4reset = Button(text = "Reset", background_color = [1,0,0,1], color = [0,0,0,1])
         self.r4reset.bind(on_press = self.r4Reset)
         self.part10.add_widget(self.r4reset)
-
         self.r4start = Button(text = "Start", background_color = [0,1,0,1],color = [0,0,0,1])
         self.r4start.bind(on_press = self.r4Start)
         self.part10.add_widget(self.r4start)
-
         self.part6.add_widget(self.part10)
         self.part2.add_widget(self.part6)
-
         self.part2.add_widget(Label(text = ""))
         self.part2.add_widget(Label(text = ""))
         self.part2.add_widget(Label(text = ""))
@@ -314,17 +264,13 @@ class Relay_Runner(Screen):
         self.part2.add_widget(Label(text = ""))
         self.part2.add_widget(Label(text = ""))
         self.part2.add_widget(Label(text = ""))
-
-        self.MainMenu = Button(text = "Main Menu",font_size = 15)
+        self.MainMenu = Button(text = "Main Menu",font_size = 15)# Screen Switch Button
         self.MainMenu.bind(on_press=self.Main_Menu_Button)
         self.part2.add_widget(self.MainMenu)
-
-        self.RelaySettingsB = Button(text = "Relay Settings",font_size = 15) 
+        self.RelaySettingsB = Button(text = "Relay Settings",font_size = 15)# Screen Switch Button
         self.RelaySettingsB.bind(on_press=self.Relay_Settings_Button)
-        self.part2.add_widget(self.RelaySettingsB)
-            
+        self.part2.add_widget(self.RelaySettingsB)     
         self.add_widget(self.part2)
-
     def r1mer(self,instance):
         if(self.mrec1 == 0):
             print("Manual Extend")
@@ -791,8 +737,6 @@ class Relay_Settings(Screen):
             
             with open("relay_data.txt", "w") as f:#Writing previous input to local txt file
                 f.write(f"{self.r1p},{self.r1r},{self.r1e},{self.r2p},{self.r2r},{self.r2e},{self.r3p},{self.r3r},{self.r3e},{self.r4p},{self.r4r},{self.r4e}")
-                f.flush()
-                f.close()
             print(self.r1p,self.r1r,self.r1e)
         
         elif(self.relay_current == 2):
@@ -817,13 +761,9 @@ class Relay_Settings(Screen):
             self.r4p = int(self.presetI.text)
             self.r4r = int(self.retract_timeI.text)
             self.r4e = int(self.extend_timeI.text)
-
             with open("relay_data.txt", "w") as f:#Writing previous input to local txt file
                 f.write(f"{self.r1p},{self.r1r},{self.r1e},{self.r2p},{self.r2r},{self.r2e},{self.r3p},{self.r3r},{self.r3e},{self.r4p},{self.r4r},{self.r4e}")
-                f.flush() 
-                f.close()
             print(self.r4p,self.r4r,self.r4e)        
-
     def Main_Menu_Button(self, instance):
         app = App.get_running_app()
         app.sm.current = 'menu'
@@ -842,9 +782,6 @@ class GUI(App):
         self.sm.add_widget(Main_Menu(name='menu'))
         self.sm.add_widget(Relay_Runner(name = 'Relay_Runner'))
         self.sm.add_widget(Relay_Settings(name = 'Relay_Settings'))
-
         return self.sm
-    
-    
 if __name__ =="__main__":
     GUI().run() 
