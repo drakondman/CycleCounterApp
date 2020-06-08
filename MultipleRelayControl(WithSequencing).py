@@ -3,7 +3,7 @@ import time
 import threading
 import kivy
 from kivy.config import Config
-Config.set('kivy', 'keyboard_mode', 'systemanddock')
+Config.set('kivy', 'keyboard_mode', 'systemanddock') 
 from kivy.app import App   
 from kivy.uix.label import Label
 from kivy.uix.gridlayout import GridLayout
@@ -22,8 +22,8 @@ from kivy.lang import builder
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.properties import ObjectProperty, StringProperty, ListProperty, BooleanProperty, NumericProperty, DictProperty
 from kivy.lang import Builder
-#import RPi.GPIO as GPIO
-"""
+import RPi.GPIO as GPIO
+
 GPIO.setwarnings(False)
 
 GPIO.setmode(GPIO.BOARD)
@@ -42,7 +42,7 @@ GPIO.output(Relay1, GPIO.LOW)
 GPIO.output(Relay2, GPIO.LOW)
 GPIO.output(Relay3, GPIO.LOW)
 GPIO.output(Relay4, GPIO.LOW)
-"""
+
 KV = """
 ScreenManager:
     Screen:
@@ -648,14 +648,17 @@ class SequenceManager(Screen):
         self.sequence_cycle = float(app.seqData[0])
         self.sequence_time_master = float(app.seqData[1])
         print("Start Started")
+
         if(self.start_pressed_bool == False):
             print('Start Pressed')
             self.canceling_thread_relay1 = False
             if self.thread_master_sequence is not None:
                 return
             print('passed return')
+            self.canceling_thread_master_sequence = False
             self.canceling_thread_relay1 = False
             self.start_pressed_bool = True
+            self.current_time_in_cycle = 0
             instance.text = 'STOP'
             instance.background_color = [1,0,0,1]
             self.thread_master_sequence = threading.Thread(target=self.sequence_master)
@@ -664,9 +667,9 @@ class SequenceManager(Screen):
             print('completed the start func')
         elif(self.start_pressed_bool == True):
             print("start has already been pressed")
-            self.canceling_thread_master_sequence = True
             self.current_cycles = 0
             self.start_pressed_bool = False
+            self.canceling_thread_master_sequence = True
             instance.text = 'START'
             instance.background_color = [0,1,0,1]
             
@@ -685,10 +688,12 @@ class SequenceManager(Screen):
                 print('Resumed')
     def reset_pressed(self,instance): #This sets the current cycles that the user sees back to 0 when the button is pressed 
         self.current_cycles = 0 
+        self.current_time_in_cycle = 0
         print("Sequence Reset") 
     def canceling_thread_master_sequence1(self):
         self.canceling_thread_master_sequence = True
     def sequence_master(self):
+        print("Thread")
         while not self.canceling_thread_master_sequence:
             if(self.paused_bool == True):
                 continue
@@ -731,33 +736,35 @@ class SequenceManager(Screen):
                 self.current_time_in_cycle = round(self.current_time_in_cycle,1)
             if(self.current_cycles == self.sequence_cycle):
                 self.canceling_thread_master_sequence1()
+                self.start_pressed_bool == False
                 break 
+        self.thread_master_sequence = None
     def relay1(self):
         print('relay1 fired')
-        #GPIO.output(Relay1,GPIO.HIGH)
+        GPIO.output(Relay1,GPIO.HIGH)
         time.sleep(self.extend_time_relay1)
-        #GPIO.output(Relay1,GPIO.LOW)
+        GPIO.output(Relay1,GPIO.LOW)
         time.sleep(self.retract_time_relay1)
         self.relay_fired = 0 
     def relay2(self):
         print('relay2 fired')
-        #GPIO.output(Relay2,GPIO.HIGH)
+        GPIO.output(Relay2,GPIO.HIGH)
         time.sleep(self.extend_time_relay2)
-        #GPIO.output(Relay2,GPIO.LOW)
+        GPIO.output(Relay2,GPIO.LOW)
         time.sleep(self.retract_time_relay2)
         self.relay_fired = 0
     def relay3 (self):
         print('relay3 fired')
-        #GPIO.output(Relay3,GPIO.HIGH)
+        GPIO.output(Relay3,GPIO.HIGH)
         time.sleep(self.extend_time_relay3)
-        #GPIO.output(Relay3,GPIO.LOW)
+        GPIO.output(Relay3,GPIO.LOW)
         time.sleep(self.retract_time_relay3)
         self.relay_fired = 0     
     def relay4(self):
         print('relay4 fired')
-        #GPIO.output(Relay4,GPIO.HIGH)
+        GPIO.output(Relay4,GPIO.HIGH)
         time.sleep(self.extend_time_relay4)
-        #GPIO.output(Relay4,GPIO.LOW)
+        GPIO.output(Relay4,GPIO.LOW)
         time.sleep(self.retract_time_relay4)
         self.relay_fired = 0
 class SequenceSettings(Screen):
@@ -771,7 +778,6 @@ class SequenceSettings(Screen):
     relay3_start_time = NumericProperty(0)
     relay4_start_time = NumericProperty(0)
     current_relayS = NumericProperty(0)
-
     def relay1_select(self,instance):
         self.current_relayS = 1
     def relay2_select(self,instance):
@@ -911,12 +917,12 @@ class TaskManger(Screen):
             print("Manual Extend")
             instance.text = "Manual Retract"
             self.relay1_extended_or_retracted += 1
-            #GPIO.output(Relay1, GPIO.HIGH)
+            GPIO.output(Relay1, GPIO.HIGH)
         else: 
             print("Manual Retract")
             instance.text = "Manual Extend"
             self.relay1_extended_or_retracted -= 1
-            #GPIO.output(Relay1, GPIO.LOW)
+            GPIO.output(Relay1, GPIO.LOW)
     def relay1_start(self,instance):
         if(self.has_relay1_started == False):
             print('Start Pressed')
@@ -952,11 +958,11 @@ class TaskManger(Screen):
         self.retract_time_for_controller1 = float(self.retract_time_relay1/1000)
         while not self.canceling_thread_relay1:
             if(self.is_relay1_paused == True):
-                #GPIO.output(Relay1, GPIO.LOW)
+                GPIO.output(Relay1, GPIO.LOW)
                 continue
-            #GPIO.output(Relay1, GPIO.HIGH)
+            GPIO.output(Relay1, GPIO.HIGH)
             time.sleep(self.extend_time_for_controller1)
-            #GPIO.output(Relay1, GPIO.LOW)
+            GPIO.output(Relay1, GPIO.LOW)
             time.sleep(self.retract_time_for_controller1)
             self.current_cycles_relay1 += 1
             time.sleep(.2)
@@ -983,12 +989,12 @@ class TaskManger(Screen):
             print("Manual Extend")
             instance.text = "Manual Retract"
             self.relay2_extended_or_retracted += 1
-            #GPIO.output(Relay2, GPIO.HIGH)
+            GPIO.output(Relay2, GPIO.HIGH)
         else: 
             print("Manual Retract")
             instance.text = "Manual Extend"
             self.relay2_extended_or_retracted -= 1
-            #GPIO.output(Relay2, GPIO.LOW)
+            GPIO.output(Relay2, GPIO.LOW)
     def relay2_start(self,instance):
         if(self.has_relay2_started == False):
             print('Start Pressed')
@@ -1024,11 +1030,11 @@ class TaskManger(Screen):
         self.retract_time_for_controller2 = float(self.retract_time_relay2/1000)
         while not self.canceling_thread_relay2:
             if(self.is_relay2_paused == True):
-                #GPIO.output(Relay2, GPIO.LOW)
+                GPIO.output(Relay2, GPIO.LOW)
                 continue
-            #GPIO.output(Relay2, GPIO.HIGH)
+            GPIO.output(Relay2, GPIO.HIGH)
             time.sleep(self.extend_time_for_controller2)
-            #GPIO.output(Relay2, GPIO.LOW)
+            GPIO.output(Relay2, GPIO.LOW)
             time.sleep(self.retract_time_for_controller2)
             self.current_cycles_relay2 += 1
             time.sleep(.2)
@@ -1055,12 +1061,12 @@ class TaskManger(Screen):
             print("Manual Extend")
             instance.text = "Manual Retract"
             self.relay3_extended_or_retracted += 1
-            #GPIO.output(Relay3, GPIO.HIGH)
+            GPIO.output(Relay3, GPIO.HIGH)
         else: 
             print("Manual Retract")
             instance.text = "Manual Extend"
             self.relay3_extended_or_retracted -= 1
-            #GPIO.output(Relay3, GPIO.LOW)
+            GPIO.output(Relay3, GPIO.LOW)
     def relay3_start(self,instance):
         if(self.has_relay3_started == False):
             print('Start Pressed')
@@ -1096,11 +1102,11 @@ class TaskManger(Screen):
         self.retract_time_for_controller3 = float(self.retract_time_relay3/1000)
         while not self.canceling_thread_relay3:
             if(self.is_relay3_paused == True):
-               #GPIO.output(Relay3, GPIO.LOW)
+               GPIO.output(Relay3, GPIO.LOW)
                 continue
-            #GPIO.output(Relay3, GPIO.HIGH)
+            GPIO.output(Relay3, GPIO.HIGH)
             time.sleep(self.extend_time_for_controller3)
-            #GPIO.output(Relay3, GPIO.LOW)
+            GPIO.output(Relay3, GPIO.LOW)
             time.sleep(self.retract_time_for_controller3)
             self.current_cycles_relay3 += 1
             time.sleep(.2)
@@ -1127,12 +1133,12 @@ class TaskManger(Screen):
             print("Manual Extend")
             instance.text = "Manual Retract"
             self.relay4_extended_or_retracted += 1
-            #GPIO.output(Relay4, GPIO.HIGH)
+            GPIO.output(Relay4, GPIO.HIGH)
         else: 
             print("Manual Retract")
             instance.text = "Manual Extend"
             self.relay4_extended_or_retracted -= 1
-            #GPIO.output(Relay4, GPIO.LOW)
+            GPIO.output(Relay4, GPIO.LOW)
     def relay4_start(self,instance):
         if(self.has_relay4_started == False):
             print('Start Pressed')
@@ -1168,11 +1174,11 @@ class TaskManger(Screen):
         self.retract_time_for_controller4 = float(self.retract_time_relay1/1000)
         while not self.canceling_thread_relay4:
             if(self.is_relay4_paused == True):
-                #GPIO.output(Relay4, GPIO.LOW)
+                GPIO.output(Relay4, GPIO.LOW)
                 continue
-            #GPIO.output(Relay4, GPIO.HIGH)
+            GPIO.output(Relay4, GPIO.HIGH)
             time.sleep(self.extend_time_for_controller4)
-            #GPIO.output(Relay4, GPIO.LOW)
+            GPIO.output(Relay4, GPIO.LOW)
             time.sleep(self.retract_time_for_controller4)
             self.current_cycles_relay4 += 1
             time.sleep(.2)
